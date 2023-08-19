@@ -1,39 +1,39 @@
-function [eof pc expvar] = eof(data,N)
+function [eof, pc, expvar] = eof(data, N)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    code to compute first N empirical orthogonal functions (EOFs)    %
-%                                                                     %
-% author: Fernando Campos (fcampos@cicese.edu.mx)                     %
-% Description:                                                        %
-% input: data -> variable with (dim nx,ny,nt) with NaN                %
-% input: N -> number of first N modes solved (integer)                %
-%                                                                     %
-% output: eof (spatial first N modes with dimension nx ny N)          %
-% output: PC (first N principal components with dimension nt N)       %
-% output: expvar (fraction of total variance explained by 1st N modes)%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %    code to compute first N empirical orthogonal functions (EOFs)    %
+    %                                                                     %
+    % author: Fernando Campos (fcampos@cicese.edu.mx)                     %
+    % Description:                                                        %
+    % input: data -> variable with (dim nx,ny,nt) with NaN                %
+    % input: N -> number of first N modes solved (integer)                %
+    %                                                                     %
+    % output: eof (spatial first N modes with dimension nx ny N)          %
+    % output: PC (first N principal components with dimension nt N)       %
+    % output: expvar (fraction of total variance explained by 1st N modes)%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[dx dy dt] = size(data);
+    [dx, dy, dt] = size(data);
 
-data = reshape(data,dx*dy,dt)'; ind = find(~isnan(data(1,:))); ndata(:,:) = data(:,ind);
+    data = reshape(data, dx * dy, dt)'; ind = find(~isnan(data(1, :))); ndata(:, :) = data(:, ind);
 
-[nt nx] = size(ndata);
+    [nt, nx] = size(ndata);
 
-F = detrend(ndata,'constant')/sqrt(nt);
+    F = detrend(ndata, 'constant') / sqrt(nt);
 
-[C,L,CC,~] = svds(double(F),N);
+    [C, L, CC, ~] = svds(double(F), N);
 
-PC = F*CC;
+    PC = F * CC;
 
-for i = 1:N
-  e(i,:) = squeeze(CC(:,i))'*sqrt(nt);
-  pc(i,:) = squeeze(PC(:,i))';
-end
+    for i = 1:N
+        e(i, :) = squeeze(CC(:, i))' * sqrt(nt);
+        pc(i, :) = squeeze(PC(:, i))';
+    end
 
-eof = NaN(dx*dy,N); eof(ind,:) = e'; eof = reshape(eof,dx,dy,N);
+    eof = NaN(dx * dy, N); eof(ind, :) = e'; eof = reshape(eof, dx, dy, N);
 
-L = diag(L).^2;
+    L = diag(L).^2;
 
-expvar = 100*L/sum(L);
+    expvar = 100 * L / sum(L);
 
-return
+    return

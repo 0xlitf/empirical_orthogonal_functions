@@ -1,55 +1,57 @@
-function [camp cpha tamp tpha expvar] = ceof(data,N)
+function [camp cpha tamp tpha expvar] = ceof(data, N)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    code to compute first N complex empirical orthogonal functions (CEOFs)    %
-%                                                                              %
-% author: Fernando Campos (fcampos@cicese.edu.mx)                              %
-% Description:                                                                 %
-% input: data -> variable with (dim nx,ny,nt) with NaN                         %
-% input: N -> number of first N modes solved (integer)                         %
-%                                                                              %
-% output: camp (spatial first N modes of amplitude with dimension nx ny N)     %
-% output: cpha (spatial first N modes of phase with dimension nx ny N)         %
-% output: tamp (first N principal components of amplitude with dimension nt N) %
-% output: tpha (first N principal components of phase with dimension nt N)     %
-% output: expvar (fraction of total variance explained by 1st N modes)         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %    code to compute first N complex empirical orthogonal functions (CEOFs)    %
+    %                                                                              %
+    % author: Fernando Campos (fcampos@cicese.edu.mx)                              %
+    % Description:                                                                 %
+    % input: data -> variable with (dim nx,ny,nt) with NaN                         %
+    % input: N -> number of first N modes solved (integer)                         %
+    %                                                                              %
+    % output: camp (spatial first N modes of amplitude with dimension nx ny N)     %
+    % output: cpha (spatial first N modes of phase with dimension nx ny N)         %
+    % output: tamp (first N principal components of amplitude with dimension nt N) %
+    % output: tpha (first N principal components of phase with dimension nt N)     %
+    % output: expvar (fraction of total variance explained by 1st N modes)         %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[dx dy dt] = size(data);
+    [dx dy dt] = size(data);
 
-data = reshape(data,dx*dy,dt)'; ind = find(~isnan(data(1,:))); ndata(:,:) = data(:,ind);
+    data = reshape(data, dx * dy, dt)';
+    ind = find(~isnan(data(1, :)));
+    ndata(:, :) = data(:, ind);
 
-[nt nx] = size(ndata);
+    [nt nx] = size(ndata);
 
-ndata = detrend(ndata,'constant')/sqrt(nt);
+    ndata = detrend(ndata, 'constant') / sqrt(nt);
 
-F = hilbert(ndata); 
+    F = hilbert(ndata);
 
-[C,L,CC,~] = svds(double(F),N);
+    [C, L, CC, ~] = svds(double(F), N);
 
-PC = F*CC;
+    PC = F * CC;
 
-for i = 1:N
-  e(i,:) = squeeze(CC(:,i))'*sqrt(nt);
-  pc(i,:) = squeeze(PC(:,i))';
-end
+    for i = 1:N
+        e(i, :) = squeeze(CC(:, i))' * sqrt(nt);
+        pc(i, :) = squeeze(PC(:, i))';
+    end
 
-tamp = power(pc.*conj(pc),0.5);
+    tamp = power(pc .* conj(pc), 0.5);
 
-tpha = angle(pc);
+    tpha = angle(pc);
 
-spatial_amp = power(e.*conj(e),0.5);
+    spatial_amp = power(e .* conj(e), 0.5);
 
-spatial_pha = angle(e);
+    spatial_pha = angle(e);
 
-camp = NaN(dx*dy,N); cpha = NaN(dx*dy,N);
+    camp = NaN(dx * dy, N); cpha = NaN(dx * dy, N);
 
-camp(ind,:) = spatial_amp'; camp = reshape(camp,dx,dy,N);
+    camp(ind, :) = spatial_amp'; camp = reshape(camp, dx, dy, N);
 
-cpha(ind,:) = spatial_pha'; cpha = reshape(cpha,dx,dy,N);
+    cpha(ind, :) = spatial_pha'; cpha = reshape(cpha, dx, dy, N);
 
-L = diag(L).^2;
+    L = diag(L).^2;
 
-expvar = 100*L/sum(L);
+    expvar = 100 * L / sum(L);
 
-return
+    return
